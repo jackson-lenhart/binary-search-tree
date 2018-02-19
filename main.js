@@ -1,6 +1,6 @@
 "use strict";
 
-function Node(value, parent = null, left = null, right = null) {
+function Node(value, left = null, right = null) {
   return {
     value,
     left,
@@ -31,7 +31,6 @@ function insert(x, root) {
       throw new Error("undefined behavior in insert");
     }
   }
-
   throw new Error("failed to insert");
 }
 
@@ -88,6 +87,13 @@ function remove(x, root, parent = null) {
   console.log("Failure to remove: could not find value");
 }
 
+function inOrderTraversal(root) {
+  if (root === null) return;
+  inOrderTraversal(root.left);
+  console.log(root.value);
+  inOrderTraversal(root.right);
+}
+
 function BinarySearchTree(seed) {
   if (!Array.isArray(seed)) {
     throw new Error("BinarySearchTree must be seeded with an array");
@@ -98,3 +104,6 @@ function BinarySearchTree(seed) {
   });
   return root;
 }
+
+let bst = BinarySearchTree([38, 44, 11, 5, 66, 88, 55, 22, 28]);
+inOrderTraversal(bst);
