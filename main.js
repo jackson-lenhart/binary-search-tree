@@ -8,90 +8,85 @@ function Node(value, left = null, right = null) {
   };
 }
 
-function insert(x, root) {
-  let currNode = root;
-  while (currNode) {
-    if (x < currNode.value) {
-      if (currNode.left) {
-        currNode = currNode.left;
-      } else {
-        currNode.left = Node(x);
-        return;
-      }
-    } else if (x > currNode.value) {
-      if (currNode.right) {
-        currNode = currNode.right;
-      } else {
-        currNode.right = Node(x);
-        return;
-      }
-    } else if (x === currNode.value) {
-      throw new Error("cannot insert node with the same value as an existing node");
-    } else {
-      throw new Error("undefined behavior in insert");
-    }
+function insert(x, node, parent = null, direction = null) {
+  if (node === null) {
+    return parent[direction] = Node(x);
   }
-  throw new Error("failed to insert");
+  if (x < node.value) {
+    insert(x, node.left, node, "left");
+  } else if (x > node.value) {
+    insert(x, node.right, node, "right");
+  } else {
+    throw new Error("Insertion of invalid node");
+  }
 }
 
-function remove(x, root, parent = null) {
-  let currNode = root;
-  while (currNode) {
-    if (x < currNode.value) {
-      if (currNode.left) {
-        parent = currNode;
+function remove(x, node, parent = null, direction = null) {
+  if (node === null) {
+    throw new Error("Could not find node to remove");
+  }
+
+  if (node.value === x) {
+    if (!node.left && !node.right) {
+      return parent ?
+        parent[direction] = null :
+        node.value = null;
+    } else if (node.left && !node.right) {
+      let currNode = node.left;
+      let currParent = node;
+      if (!currNode.right) {
+        node.value = currNode.value;
+        return node.left = currNode.left;
+      }
+      while (currNode.right) {
+        currParent = currNode;
+        currNode = currNode.right;
+      }
+      node.value = currNode.value;
+      return currParent.right = null;
+    } else if (!node.left && node.right) {
+      let currNode = node.right;
+      if (!currNode.left) {
+        node.value = currNode.value;
+        return node.right = currNode.right;
+      }
+      let currParent = node;
+      while (currNode.left) {
+        currParent = currNode;
         currNode = currNode.left;
-      } else {
-        console.error("Failure to remove: could not find value");
-        return;
       }
-    } else if (x > currNode.value) {
-      if (currNode.right) {
-        parent = currNode;
+      node.value = currNode.value;
+      return currParent.left = null;
+    } else if (node.left && node.right) {
+      let currNode = node.left;
+      if (!currNode.right) {
+        node.value = currNode.value;
+        return node.left = currNode.left;
+      }
+      let currParent = node;
+      while (currNode.right) {
+        currParent = currNode;
         currNode = currNode.right;
-      } else {
-        console.error("Failure to remove: could not find value");
-        return;
       }
-    } else if (x === currNode.value) {
-      let toRemove = currNode;
-      if (!toRemove.left && !toRemove.right) {
-        toRemove === parent.left ?
-          parent.left = null :
-          parent.right = null;
-        return;
-      } else if (!toRemove.left || !toRemove.right) {
-        if (toRemove.left) {
-          parent.left = toRemove.left;
-        } else if (toRemove.right) {
-          parent.right = toRemove.right;
-        } else {
-          throw new Error("Unexpected behavior in removal");
-        }
-        return;
-      } else if (toRemove.left && toRemove.right) {
-        //find min value in right subtree
-        parent = currNode;
-        currNode = currNode.right;
-        while (currNode.left) {
-          parent = currNode;
-          currNode = currNode.left;
-        }
-        toRemove.value = currNode.value;
-        return remove(currNode.value, currNode, parent);
-      } else {
-        throw new Error("Unexpected behavior in removal");
-      }
+      node.value = currNode.value;
+      return currParent.right = null;
     }
   }
-  console.log("Failure to remove: could not find value");
+
+  if (x < node.value) {
+    remove(x, node.left, node, "left");
+  } else if (x > node.value) {
+    remove(x, node.right, node, "right");
+  } else {
+    throw new Error("Unhandled exception in remove");
+  }
 }
 
-function inOrderTraversal(root) {
-  if (root === null) return;
-  inOrderTraversal(root.left);
-  console.log(root.value);
-  inOrderTraversal(root.right);
+function inOrderTraversal(node) {
+  if (node === null) return;
+  inOrderTraversal(node.left);
+  console.log(node.value);
+  inOrderTraversal(node.right);
 }
 
 function BinarySearchTree(seed) {
@@ -104,6 +99,3 @@ function BinarySearchTree(seed) {
   });
   return root;
 }
-
-let bst = BinarySearchTree([38, 44, 11, 5, 66, 88, 55, 22, 28]);
-inOrderTraversal(bst);
